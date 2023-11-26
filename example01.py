@@ -1,8 +1,9 @@
-"""
-Launching a thread in Python is easy using the threading module. Just give the target
-function to be called with the specified args and kwargs. But is stopping the thread
-easy? How do you stop a running thread?
-"""
+# Launching a thread in Python is easy using the threading module. Just give the target
+# function to be called with the specified args and kwargs. But is stopping the thread
+# easy? How do you stop a running thread?
+# Discussion:
+#  * How to stop a running thead?
+
 from logger import init_logger
 
 init_logger()
