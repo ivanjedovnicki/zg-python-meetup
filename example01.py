@@ -1,8 +1,10 @@
 # Launching a thread in Python is easy using the threading module. Just give the target
-# function to be called with the specified args and kwargs. But is stopping the thread
-# easy? How do you stop a running thread?
+# function to be called with the specified args and kwargs.
 # Discussion:
-#  * How to stop a running thead?
+#  * What is the difference between a thread and a process?
+#  * Isn't Python single-threaded?
+#  * Are those real OS threads?
+#  * Who controls the switching of threads?
 
 from logger import init_logger
 
@@ -13,7 +15,7 @@ import threading
 import time
 
 
-def target(sleep: float = 1):
+def background(sleep: float = 1):
     count = 1
     while True:
         logging.info(f'Count: {count}.')
@@ -21,5 +23,5 @@ def target(sleep: float = 1):
         time.sleep(sleep)
 
 
-t = threading.Thread(target=target, args=(10,), name='Background')
+t = threading.Thread(target=background, args=(10,), name='Background')
 t.start()

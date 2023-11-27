@@ -4,7 +4,7 @@
 # Discussion:
 #  * Race conditions
 #  * How to help stuck consumers?
-#  * Understanding the race condition by inspecting bytecode
+#  * Understanding race condition by inspecting bytecode
 
 import logging
 import queue

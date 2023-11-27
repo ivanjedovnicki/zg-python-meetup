@@ -1,45 +1,78 @@
-# A common problem solved by threads involves one thread producing some data, and
-# another consuming or processing that data. The queue.Queue data structure is used for
-# thread-safe communication.
+# What happens to the main thread if some thread throws an unhandled exception?
 #
 # Discussion:
-#  * multiple producers and consumers
+#  * .join()
+#  * How do we stop this consumer thread? Is threading.Event enough?
+#  * How to handle exceptions from another thread?
 
 import logging
-import queue
-import threading
 import time
 
 from logger import init_logger
 
 init_logger()
 
-qq = queue.Queue()
-_poison_pill = object()
+import queue
+import threading
+from typing import NamedTuple, Optional
 
 
-def producer(q: queue.Queue, sleep: float = 1):
-    for i in range(10):
-        time.sleep(sleep)
-        logging.info(f'Producing {i}.')
-        q.put(i)
-    logging.info('Producer done.')
-    q.put(_poison_pill)
+class Task(NamedTuple):
+    a: float
+    b: float
+    opcode: str
+    result: Optional[float] = None
 
 
-def consumer(q: queue.Queue, sleep: float = 3):
-    while True:
-        time.sleep(sleep)
-        item = q.get()
-        logging.info(f'Consuming {item}.')
-        if item is _poison_pill:
-            # What happens without the poison pill?
-            logging.info('Got poison pill.')
-            break
+class Calculator:
+    def __init__(self):
+        self._task_queue: queue.Queue[Task] = queue.Queue()
+        self._result_queue: queue.Queue[Task] = queue.Queue()
+        self._background_thread = threading.Thread(
+            target=self._background, name='Background'
+        )
+        self._consumer_thread = threading.Thread(
+            target=self._task_consumer, name='Task consumer'
+        )
+        self._count = 0
+
+    def start(self):
+        self._background_thread.start()
+        self._consumer_thread.start()
+
+        # self._background_thread.join()
+        # self._consumer_thread.join()
+
+    def put(self, task: Task):
+        logging.info(f'Putting task {task} into the task queue.')
+        self._task_queue.put(task)
+
+    def _background(self):
+        while True:
+            logging.info(f'Count: {self._count}.')
+            logging.info(f'Numer of active threads is {threading.active_count()}.')
+            time.sleep(15)
+
+    def _task_consumer(self):
+        while True:
+            task = self._task_queue.get()
+            logging.info(f'Got task {task}.')
+            match task.opcode:
+                case '+':
+                    result = task.a + task.b
+                case '-':
+                    result = task.a - task.b
+                case '*':
+                    result = task.a * task.b
+                case '/':
+                    result = task.a / task.b
+                case _:
+                    raise ValueError(f'Invalid opcode {task.opcode}.')
+            task_result = Task(task.a, task.b, task.opcode, result)
+            logging.info(f'Putting result {task_result} into the result queue.')
+            self._result_queue.put(task_result)
 
 
-t1 = threading.Thread(target=producer, args=(qq,))
-t2 = threading.Thread(target=consumer, args=(qq,))
-
-t1.start()
-t2.start()
+calculator = Calculator()
+task_1 = Task(1, 2, '+')
+task_2 = Task(1, 0, '/')
