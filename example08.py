@@ -6,14 +6,21 @@
 import logging
 import threading
 import time
-
+import sys
 from logger import init_logger
 
 init_logger()
 
 from cpubound import cpu_bound
 
-num_threads = 3
+LOW_SWITCH_INTERVAL = 5e-6  # 5 microseconds
+DEFAULT_SWITCH_INTERVAL = 5e-3  # 5 milliseconds
+HIGH_SWITCH_INTERVAL = 1  # 1 second
+
+sys.setswitchinterval(HIGH_SWITCH_INTERVAL)
+logging.info(f'Thread switch interval is {sys.getswitchinterval()}.')
+
+num_threads = 1
 cpu_bound_threads = [
     threading.Thread(target=cpu_bound, args=(250_000_000,), name=f'CPU bound {i}')
     for i in range(1, num_threads + 1)
