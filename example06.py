@@ -37,4 +37,3 @@ lock_thread = threading.Thread(target=lock_target, name='Lock thread')
 waiter_threads = [
     threading.Thread(target=wait_target, name=f'Waiter {i}') for i in range(3)
 ]
-
