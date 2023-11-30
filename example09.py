@@ -36,6 +36,7 @@ with ThreadPoolExecutor(max_workers=10) as executor:
 
 
 class CharToCodepointConverter:
+    # Discussion: Are there any race conditions here?
     def __init__(self, max_workers: int):
         self._max_workers = max_workers
         self._results = {char: None for char in CHARS}
